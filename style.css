@@ -19,10 +19,15 @@ body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background: var(--bg);
     margin: 0;
-    padding: 0;
+    /* Respect physical iOS safe areas globally */
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     color: var(--text-main);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     transition: font-size 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Prevent raw double-tap zooming & eliminate iOS 300ms delay */
+    touch-action: manipulation;
 }
 
 /* ==========================================================================
@@ -65,7 +70,8 @@ p {
 
 .navbar {
     background: var(--surface);
-    padding: 18px 40px;
+    /* Safe Area padding ensures title or navigation isn't cut off by physical notches */
+    padding: max(18px, env(safe-area-inset-top)) max(40px, env(safe-area-inset-right)) 18px max(40px, env(safe-area-inset-left));
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -87,6 +93,11 @@ p {
     color: var(--primary); 
 }
 
+.nav-links {
+    display: flex;
+    align-items: center;
+}
+
 .nav-links a { 
     text-decoration: none; 
     color: var(--text-muted); 
@@ -94,6 +105,9 @@ p {
     font-weight: 500; 
     font-size: 0.95rem;
     transition: color 0.2s ease;
+    
+    /* QoL: Remove grey highlight on touch in Safari */
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .nav-links a:hover, 
@@ -136,7 +150,7 @@ p {
 .directory-container {
     max-width: 1280px;
     margin: 60px auto;
-    padding: 0 24px;
+    padding: 0 max(24px, env(safe-area-inset-right)) 0 max(24px, env(safe-area-inset-left));
 }
 
 .directory-desc {
@@ -148,7 +162,7 @@ p {
 .recipe-container { 
     max-width: 640px; 
     margin: 50px auto; 
-    padding: 0 20px; 
+    padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); 
 }
 
 .recipe-card { 
@@ -187,6 +201,11 @@ p {
     color: var(--text-main);
     background: var(--surface);
     transition: border-color 0.2s ease;
+    
+   /* Prevents default browser styling and zoom triggers on focus */
+-webkit-appearance: none;
+appearance: none; /* Standard property for compatibility */
+font-size: 16px;  /* iOS standard to prevent automatic browser zoom on input focus */
 }
 
 .search-input:focus {
@@ -204,6 +223,7 @@ p {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .filter-btn:hover {
@@ -266,6 +286,7 @@ p {
     justify-content: space-between;
     padding: 36px;
     position: relative;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .recipe-directory-card:hover {
@@ -314,6 +335,7 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .fav-btn:hover {
@@ -362,6 +384,7 @@ p {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .action-icon-btn:hover {
@@ -445,10 +468,18 @@ p {
     color: var(--text-main);
     cursor: pointer;
     transition: color 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .checklist-item:hover { color: var(--primary); }
-.checklist-item input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
+/* Make checking checkboxes easier for fingers on phone displays */
+.checklist-item input { 
+    width: 22px; 
+    height: 22px; 
+    accent-color: var(--primary); 
+    cursor: pointer; 
+}
 
 .nav-info { 
     margin-top: 32px; 
@@ -477,6 +508,10 @@ p {
     font-weight: 600; 
     cursor: pointer; 
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .nav-btn:hover { background: var(--primary); }
 .nav-btn:active { transform: translateY(1px); }
@@ -497,6 +532,7 @@ p {
     font-size: 0.9rem;
     font-weight: 500; 
     transition: color 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 .back-link:hover { color: var(--primary); }
 
@@ -510,6 +546,7 @@ p {
     font-size: 0.8rem; 
     font-weight: 600;
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 .audio-btn:hover { background: var(--primary); color: var(--surface); }
 
@@ -523,6 +560,7 @@ p {
     cursor: pointer; 
     font-size: 0.85rem;
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 .toggle-camera-btn:hover { border-color: var(--text-main); background: #fafafa; }
 .toggle-camera-btn.off { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
@@ -538,6 +576,8 @@ p {
     font-size: 1rem;
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    text-align: center;
 }
 .cta-btn:hover {
     background: var(--primary);
@@ -550,8 +590,14 @@ p {
    ========================================================================== */
 
 .camera-wrapper {
-    position: fixed; top: 100px; right: 30px; width: 140px; height: 105px; z-index: 100;
-    border-radius: var(--radius-lg); overflow: hidden;
+    position: fixed; 
+    top: max(100px, env(safe-area-inset-top)); 
+    right: max(30px, env(safe-area-inset-right)); 
+    width: 140px; 
+    height: 105px; 
+    z-index: 100;
+    border-radius: var(--radius-lg); 
+    overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     border: 1px solid var(--border);
 }
@@ -571,28 +617,125 @@ p {
 }
 
 /* ==========================================================================
-   RESPONSIVE LAYOUT CONSTRAINTS
+   RESPONSIVE LAYOUT CONSTRAINTS (iPAD & PHONES COMPREHENSIVE OVERRIDES)
    ========================================================================== */
 
-@media (max-width: 992px) {
-    .recipe-grid { grid-template-columns: repeat(2, 1fr); }
-    .camera-wrapper { position: absolute; top: -125px; right: 0; width: 120px; height: 90px; }
-    .recipe-card { margin-top: 140px; }
+/* Tablet & iPad Portrait / Landscape Adaptations */
+@media (max-width: 1024px) {
+    .recipe-grid { 
+        grid-template-columns: repeat(2, 1fr) !important; 
+        gap: 20px;
+    }
+    
+    .directory-container {
+        margin: 40px auto;
+    }
+    
+    .hero-section {
+        margin-top: 80px;
+        margin-bottom: 40px;
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+    }
+
+    /* Wrap form columns so selectors don't break horizontal margins */
+    .form-row {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    .time-qty, .time-unit {
+        width: 100% !important;
+    }
+    
+    .camera-wrapper { 
+        position: absolute; 
+        top: -125px; 
+        right: 0; 
+        width: 120px; 
+        height: 90px; 
+    }
+    
+    .recipe-card { 
+        margin-top: 140px; 
+        padding: 30px;
+    }
 }
 
+/* Standard Mobile & Small Tablet Breakpoint */
 @media (max-width: 768px) {
-    .hero-section h1 { font-size: 2.5rem; }
-    .hero-section { margin-top: 60px; }
-    .search-controls { flex-direction: column; }
-    .filter-btn { width: 100%; }
+    .hero-section h1 { font-size: 2.3rem; }
+    .hero-section { margin-top: 50px; }
+    .search-controls { flex-direction: column; gap: 12px; }
+    .search-input { width: 100%; box-sizing: border-box; }
+    .filter-btn { width: 100%; text-align: center; }
+    
+    .navbar {
+        padding: 14px 20px;
+    }
 }
 
+/* Compact Mobile (iPhone Portrait Mode) */
 @media (max-width: 640px) {
-    .recipe-grid { grid-template-columns: 1fr; }
+    .navbar {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .nav-links {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .nav-links a {
+        margin-left: 0;
+    }
+
+    .recipe-grid { 
+        grid-template-columns: 1fr !important; 
+    }
+
+    .recipe-card h1 {
+        font-size: 1.8rem;
+    }
+
+    .ai-assistant-panel {
+        padding: 16px !important;
+    }
+
+    /* Stack custom list items in Form Editor vertically */
+    .dynamic-list-item {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        border-bottom: 1px dashed var(--border);
+        padding-bottom: 16px;
+    }
+
+    .ingredient-qty, .ingredient-unit, .ingredient-name {
+        width: 100% !important;
+    }
+    
+    /* Bigger tap targets for custom action overlays on phones */
+    .button-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .nav-btn {
+        width: 100%;
+        height: 48px; /* Safe Apple Human Interface Guidelines standard */
+    }
 }
 
 @media (max-width: 480px) {
     .recipe-directory-card { padding: 24px; }
+    .hero-section h1 { font-size: 2rem; }
 }
 
 /* ==========================================================================
