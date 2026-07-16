@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LetMeCook — Dynamic Cooking Workspace</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,600;1,400&family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="recipes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <style>
+        #confettiCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999; display: none; }
+        .celebration-view { text-align: center; padding: 20px 10px; }
+        .celebration-view h2 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">LetMe<span>Cook.</span></a>
+        <div class="nav-links" style="display: flex; align-items: center;">
+            <a href="index.html">Home</a>
+            <a href="recipes.html">Recipes</a>
+            <button onclick="toggleGlobalKitchenTheme()" style="background: var(--text-main); color: var(--surface); border: none; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: 24px;">
+                <span class="material-symbols-outlined" id="globalThemeIcon" style="font-size: 1.1rem;">wb_sunny</span>
+                <span id="globalThemeText">Kitchen Mode</span>
+            </button>
+        </div>
+    </nav>
+
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="recipe-container" style="position: relative;">
+        <a href="recipes.html" class="back-link">← Back to Directory</a>
+        
+        <div class="camera-wrapper">
+            <video id="webcam" autoplay playsinline></video>
+            <div class="calibration-box" id="calibrationHud"></div>
+            <div id="gestureOverlay" class="gesture-overlay">
+                <span class="material-symbols-outlined">waving_hand</span>
+            </div>
+        </div>
+
+        <div class="recipe-card">
+            <div class="controls-row">
+                <div id="statusBadge" class="status-badge">System Paused</div>
+                <button id="cameraToggle" class="toggle-camera-btn" onclick="toggleCamera()">Enable Gesture Engine</button>
+            </div>
+
+            <h1 id="recipeTitle">Loading Workspace...</h1>
+            <div id="dynamicStepContainer"></div>
+
+            <div class="accessibility-speed-container" style="margin-top: 24px; padding: 14px; background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: var(--primary); font-size: 1.3rem;">speed</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Narration Speed:</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 240px;">
+                    <input type="range" id="narrationSpeedSlider" min="0.5" max="2.0" step="0.25" value="1.0" oninput="adjustNarrationSpeedSetting(this.value)" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                    <span id="speedIndicatorLabel" style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); min-width: 35px; text-align: right;">1.0x</span>
+                </div>
+            </div>
+
+            <div class="step" id="celebrationStep" style="display:none;">
+                <div class="celebration-view">
+                    <h2>Buon Appetito! <span class="material-symbols-outlined" style="font-size: 2.5rem; vertical-align: middle; color: var(--primary);">skillet</span></h2>
+                    <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text-main); margin-bottom: 24px;">
+                        You have successfully completed the recipe execution loop completely hands-free. Your culinary masterwork is ready to serve.
+                    </p>
+                    <a href="recipes.html" class="cta-btn" style="display:inline-block; text-decoration:none; padding:12px 24px; font-size:0.95rem;">Return to Directory</a>
+                </div>
+            </div>
+
+            <div class="button-group" id="recipeButtonGroup">
+                <button class="nav-btn secondary" onclick="changeStep(-1)">Previous</button>
+                <button class="nav-btn" onclick="changeStep(1)">Next Step</button>
+            </div>
+
+            <div class="nav-info" id="recipeNavInfo">
+                <strong>Manual Navigation:</strong> Click or tap interface buttons seamlessly.<br>
+                <strong>Hands-Free Cooking:</strong> Turn on camera tracking. Wave laterally across screen lens to navigate steps. Close hand into a fist to pause dictation; open hand to resume.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const recipeKey = urlParams.get('recipe') || 'carbonara';
+
+        const DEFAULT_FALLBACK = {
+            title: "Spaghetti Carbonara",
+            ingredients: ["200g Dried Spaghetti", "100g Cured Guanciale, cubed", "2 Farmhouse Eggs, beaten", "1 Cup Pecorino Romano, freshly grated", "Freshly whole cracked black pepper"],
+            steps: [
+                "Bring a large pot of heavily salted water to a rolling boil. Introduce 200g of spaghetti and cook until al dente—approximately 8 to 10 minutes.",
+                "While the pasta processes, heat a heavy-bottomed pan over medium heat. Add the diced guanciale, rendering the fat until chunks become golden and crisp.",
+                "In a clean mixing bowl, vigorous whisk the whole eggs along with your grated Pecorino Romano cheese. Incorporate a generous amount of toasted black pepper to form a thick paste.",
+                "Drain pasta while reserving half a cup of starchy water. Toss hot pasta instantly inside the guanciale pan. Remove from flame entirely, pour in egg cream mixture, and rapidly agitate to form a velvety, un-scrambled sauce emulsion."
+            ]
+        };
+
+        const activeRecipe = (typeof RECIPE_DATA !== 'undefined' && RECIPE_DATA[recipeKey]) ? RECIPE_DATA[recipeKey] : DEFAULT_FALLBACK;
+        let currentStep = 0;
+        const totalSteps = activeRecipe.steps.length + 2; 
+
+        const videoElement = document.getElementById('webcam');
+        const statusBadge = document.getElementById('statusBadge');
+        const cameraToggle = document.getElementById('cameraToggle');
+        const overlay = document.getElementById('gestureOverlay');
+        const calHud = document.getElementById('calibrationHud');
+        const btnGroup = document.getElementById('recipeButtonGroup');
+        const navInfo = document.getElementById('recipeNavInfo');
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let isCameraRunning = false;
+        let cameraEngine = null;
+        let frameHistory = [];         
+        const HISTORY_SIZE = 5;        
+        let lastWaveTime = 0;          
+        const WAVE_COOLDOWN = 1200;    
+
+        let isSpeechPausedByFist = false;
+        let userVoiceRateSetting = 1.0; 
+        let confettiParticles = [];
+        let confettiAnimationId = null;
+
+        function buildWorkspaceDOM() {
+            document.getElementById('recipeTitle').innerText = activeRecipe.title;
+            const container = document.getElementById('dynamicStepContainer');
+            let contentMarkup = '';
+
+            contentMarkup += `
+                <div class="step active" id="step0">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0;">Mise en Place <span class="step-meta">Step 0 of ${activeRecipe.steps.length}</span></h3>
+                        <button type="button" class="audio-btn" onclick="checkAllIngredientsShortcut()" style="display: inline-flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">done_all</span> Select All Items
+                        </button>
+                    </div>
+                    <p>Prepare your kitchen workstation and check off ingredients before initializing gesture controls:</p>
+                    <div id="ingredientsChecklist">
+                        ${activeRecipe.ingredients.map(ing => `<label class="checklist-item"><input type="checkbox"> ${ing}</label>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            activeRecipe.steps.forEach((text, i) => {
+                const num = i + 1;
+                contentMarkup += `
+                    <div class="step" id="step${num}" style="display:none;">
+                        <h3>${num}. Process Phase 
+                            <button class="audio-btn" onclick="speakDynamicText(${num})">🔊 Dictate</button>
+                            <span class="step-meta">Step ${num} of ${activeRecipe.steps.length}</span>
+                        </h3>
+                        <p id="step${num}Text">${text}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = contentMarkup;
+        }
+
+        buildWorkspaceDOM();
+
+        function checkAllIngredientsShortcut() {
+            const boxes = document.querySelectorAll('#ingredientsChecklist input[type="checkbox"]');
+            boxes.forEach(cb => cb.checked = true);
+        }
+
+        function adjustNarrationSpeedSetting(newRateValue) {
+            userVoiceRateSetting = parseFloat(newRateValue);
+            const speedLabel = document.getElementById('speedIndicatorLabel');
+            if (speedLabel) speedLabel.innerText = `${userVoiceRateSetting.toFixed(2)}x`;
+            
+            if (window.speechSynthesis.speaking && currentStep > 0) {
+                speakDynamicText(currentStep);
+            }
+        }
+
+        function onResults(results) {
+            if (!isCameraRunning) return;
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                const stableAnchor = landmarks[9]; 
+                
+                if (stableAnchor.x > 0.1 && stableAnchor.x < 0.9 && stableAnchor.y > 0.1 && stableAnchor.y < 0.9) {
+                    calHud.style.borderColor = "var(--primary)";
+                } else {
+                    calHud.style.borderColor = "rgba(239, 68, 68, 0.6)"; 
+                }
+
+                handleFistDictationControl(landmarks);
+
+                if (!isSpeechPausedByFist) {
+                    handleSmoothedWave(stableAnchor);
+                }
+            } else {
+                statusBadge.innerHTML = "Camera Ready";
+                statusBadge.classList.add('active');
+                calHud.style.borderColor = "rgba(45, 212, 191, 0.3)";
+                frameHistory = []; 
+            }
+        }
+
+        function handleFistDictationControl(landmarks) {
+            const wrist = landmarks[0];
+            const fingerTips = [8, 12, 16, 20]; 
+            let spatialProximitySum = 0;
+            fingerTips.forEach(idx => {
+                const tip = landmarks[idx];
+                spatialProximitySum += Math.sqrt(Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2));
+            });
+            const FIST_DISTANCE_THRESHOLD = 0.75; 
+
+            if (spatialProximitySum < FIST_DISTANCE_THRESHOLD) {
+                if (!isSpeechPausedByFist && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    window.speechSynthesis.pause(); 
+                    isSpeechPausedByFist = true;
+                    triggerVisualFeedback("pause"); 
+                }
+                statusBadge.innerHTML = "Dictation Paused ⏸️";
+            } else {
+                if (isSpeechPausedByFist) {
+                    window.speechSynthesis.resume(); 
+                    isSpeechPausedByFist = false;
+                    triggerVisualFeedback("play_arrow"); 
+                }
+                statusBadge.innerHTML = "Tracking Active";
+                statusBadge.classList.add('active');
+            }
+        }
+
+        function handleSmoothedWave(anchor) {
+            const currentTime = Date.now();
+            frameHistory.push({ x: anchor.x, y: anchor.y, time: currentTime });
+            if (frameHistory.length > HISTORY_SIZE) frameHistory.shift();
+            if (frameHistory.length < HISTORY_SIZE) return;
+
+            const oldestFrame = frameHistory[0];
+            const newestFrame = frameHistory[frameHistory.length - 1];
+            const velocityX = (newestFrame.x - oldestFrame.x) / (newestFrame.time - oldestFrame.time);
+
+            if (currentTime - lastWaveTime < WAVE_COOLDOWN) return;
+            const SWIPE_VELOCITY_THRESHOLD = 0.0006; 
+
+            if (Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                if (velocityX > 0) {
+                    triggerVisualFeedback("arrow_forward"); 
+                    changeStep(1);
+                } else {
+                    triggerVisualFeedback("arrow_back"); 
+                    changeStep(-1);
+                }
+                lastWaveTime = currentTime;
+                frameHistory = [];
+            }
+        }
+
+        function changeStep(direction) {
+            if (currentStep === 0 && direction === -1) return;
+            if (currentStep === totalSteps - 1 && direction === 1) return;
+
+            if (currentStep === 0 && direction === 1) {
+                const boxes = document.querySelectorAll('#ingredientsChecklist input[type="checkbox"]');
+                const allChecked = Array.from(boxes).every(cb => cb.checked);
+                if (!allChecked) {
+                    triggerVisualFeedback("error"); 
+                    statusBadge.innerHTML = "Gather ingredients first!";
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(new SpeechSynthesisUtterance("Please gather and verify all ingredients before starting."));
+                    return; 
+                }
+            }
+
+            window.speechSynthesis.cancel();
+            isSpeechPausedByFist = false; 
+            deactivateConfettiCanvas(); 
+
+            if (currentStep === totalSteps - 1) {
+                document.getElementById('celebrationStep').style.display = 'none';
+            } else {
+                const currentTarget = document.getElementById(`step${currentStep}`);
+                if (currentTarget) currentTarget.style.display = 'none';
+            }
+
+            currentStep = currentStep + direction;
+            btnGroup.style.display = 'flex';
+            navInfo.style.display = 'block';
+
+            if (currentStep === totalSteps - 1) {
+                document.getElementById('celebrationStep').style.display = 'block';
+                btnGroup.style.display = 'none';
+                navInfo.style.display = 'none';
+                triggerCelebrationAudioChime();
+                activateConfettiCanvas();
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(`Congratulations! You have completed the instructions for ${activeRecipe.title}.`));
+            } else {
+                const nextTarget = document.getElementById(`step${currentStep}`);
+                if (nextTarget) nextTarget.style.display = 'block';
+                if (currentStep > 0) { speakDynamicText(currentStep); }
+            }
+        }
+
+        function speakDynamicText(stepIndex) {
+            window.speechSynthesis.cancel(); 
+            isSpeechPausedByFist = false;
+            const textContent = document.getElementById(`step${stepIndex}Text`).innerText;
+            const speech = new SpeechSynthesisUtterance(textContent);
+            speech.rate = userVoiceRateSetting; 
+            window.speechSynthesis.speak(speech);
+        }
+
+        function triggerVisualFeedback(iconName) {
+            overlay.innerHTML = `<span class="material-symbols-outlined">${iconName}</span>`;
+            overlay.style.opacity = "1";
+            setTimeout(() => { overlay.style.opacity = "0"; }, 400);
+        }
+
+        function triggerCelebrationAudioChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const notes = [523.25, 659.25, 783.99, 1046.50]; 
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => {
+                        const osc = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                        osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                        osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+                    }, idx * 120);
+                });
+            } catch (e) { console.warn(e); }
+        }
+
+        function activateConfettiCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.display = 'block';
+            confettiParticles = [];
+            const colors = ['#0f766e', '#14b8a6', '#f59e0b', '#ef4444', '#3b82f6'];
+            for (let i = 0; i < 120; i++) {
+                confettiParticles.push({
+                    x: Math.random() * canvas.width, 
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 6 + 4, 
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2, 
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360, 
+                    rotationSpeed: Math.random() * 4 - 2
+                });
+            }
+            animateConfettiEngineLoop();
+        }
+
+        function animateConfettiEngineLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let activeCount = 0;
+            confettiParticles.forEach(p => {
+                p.y += p.speedY; p.x += p.speedX; p.rotation += p.rotationSpeed;
+                if (p.y < canvas.height) {
+                    activeCount++;
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size); ctx.restore();
+                }
+            });
+            if (activeCount > 0 && currentStep === totalSteps - 1) {
+                confettiAnimationId = requestAnimationFrame(animateConfettiEngineLoop);
+            } else { deactivateConfettiCanvas(); }
+        }
+
+        function deactivateConfettiCanvas() {
+            canvas.style.display = 'none';
+            if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+        }
+
+        function toggleCamera() {
+            if (isCameraRunning) {
+                isCameraRunning = false;
+                if (cameraEngine) cameraEngine.stop();
+                const stream = videoElement.srcObject;
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+                statusBadge.innerHTML = "System Paused";
+                statusBadge.classList.remove('active');
+                cameraToggle.innerText = "Enable Gesture Engine";
+                cameraToggle.classList.remove('off');
+                frameHistory = [];
+                isSpeechPausedByFist = false;
+            } else {
+                isCameraRunning = true;
+                cameraToggle.innerText = "Disable Gesture Engine";
+                cameraToggle.classList.add('off');
+                statusBadge.innerHTML = "Initializing Engine...";
+                initCameraEngine();
+            }
+        }
+
+        function initCameraEngine() {
+            const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+            hands.onResults(onResults);
+            cameraEngine = new Camera(videoElement, {
+                onFrame: async () => { if (isCameraRunning) await hands.send({image: videoElement}); },
+                width: 640, height: 480
+            });
+            cameraEngine.start().catch(err => { console.error(err); statusBadge.innerHTML = "Hardware Error"; });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,703 @@
+/* ==========================================================================
+   LETMECOOK SYSTEM ENGINE GLOBAL CODE MAPPINGS
+   ========================================================================== */
+
+:root {
+    --primary: #0f766e;       
+    --primary-hover: #115e59;  
+    --primary-light: #f0fdfa;  
+    --bg: #fafafa;             
+    --surface: #ffffff;        
+    --text-main: #1c1917;      
+    --text-muted: #6b6661;     
+    --border: #e7e5e4;         
+    --radius-lg: 12px;
+    --radius-sm: 6px;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+    transition: font-size 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   TYPOGRAPHY AND STRUCTURAL LINKS
+   ========================================================================== */
+
+h1 { 
+    font-family: 'Playfair Display', serif; 
+    font-weight: 600;
+    color: var(--text-main); 
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+h3 { 
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.25rem; 
+    font-weight: 600;
+    color: var(--text-main); 
+}
+
+p { 
+    font-size: 1.05rem; 
+    line-height: 1.7; 
+    color: #44403c; 
+}
+
+/* ==========================================================================
+   NAVIGATION FRAMEWORK
+   ========================================================================== */
+
+.navbar {
+    background: var(--surface);
+    padding: 18px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .logo { 
+    font-weight: 700; 
+    letter-spacing: -0.5px;
+    color: var(--text-main); 
+    font-size: 1.25rem; 
+    text-decoration: none; 
+}
+
+.navbar .logo span { 
+    color: var(--primary); 
+}
+
+.nav-links a { 
+    text-decoration: none; 
+    color: var(--text-muted); 
+    margin-left: 24px; 
+    font-weight: 500; 
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover, 
+.nav-links a.active { 
+    color: var(--primary); 
+}
+
+/* ==========================================================================
+   LAYOUT AND VIEW CONTAINERS
+   ========================================================================== */
+
+.hero-section {
+    max-width: 800px;
+    margin: 100px auto 60px;
+    text-align: center;
+    padding: 0 24px;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+}
+
+.hero-section h1 span {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--primary);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 40px;
+}
+
+.directory-container {
+    max-width: 1280px;
+    margin: 60px auto;
+    padding: 0 24px;
+}
+
+.directory-desc {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    margin-bottom: 32px;
+}
+
+.recipe-container { 
+    max-width: 640px; 
+    margin: 50px auto; 
+    padding: 0 20px; 
+}
+
+.recipe-card { 
+    background: var(--surface); 
+    padding: 40px; 
+    border-radius: var(--radius-lg); 
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    text-align: left;
+    position: relative;
+}
+
+.recipe-card h1 { font-size: 2.4rem; margin: 0 0 24px 0; }
+.recipe-card h3 { margin-top: 0; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.recipe-card p { margin-bottom: 24px; }
+
+/* ==========================================================================
+   INTERFACE FILTERS AND SEARCH CONTEXT BARS
+   ========================================================================== */
+
+.search-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 280px;
+    padding: 14px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background: var(--surface);
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.filter-btn {
+    padding: 14px 24px;
+    background: var(--surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--text-main);
+    color: var(--text-main);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: var(--surface);
+    border-color: var(--primary);
+}
+
+/* ==========================================================================
+   CARDS AND RESPONSIVE FLEXIBLE GRIDS
+   ========================================================================== */
+
+.features-grid {
+    max-width: 900px;
+    margin: 80px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px;
+    padding: 0 24px;
+}
+
+.feature-card {
+    background: var(--surface);
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.feature-card .icon {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+.feature-card h3 { font-size: 1.1rem; margin: 0 0 10px 0; }
+.feature-card p { font-size: 0.95rem; line-height: 1.6; margin: 0; color: var(--text-muted); }
+
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.recipe-directory-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-main);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 36px;
+    position: relative;
+}
+
+.recipe-directory-card:hover {
+    transform: translateY(-4px);
+    border-color: #cbd5e1;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.03);
+}
+
+.recipe-directory-card:hover .card-header h3 { 
+    color: var(--primary); 
+}
+
+.user-created-card {
+    background: #f0fdfa !important; 
+    border-color: #99f6e4 !important;
+}
+
+.card-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    padding-right: 40px;
+    transition: color 0.2s ease;
+}
+
+.card-header p { 
+    font-size: 0.95rem; 
+    line-height: 1.6; 
+    color: var(--text-muted); 
+    margin: 0 0 24px 0; 
+}
+
+.fav-btn {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    z-index: 10;
+    padding: 6px;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fav-btn:hover {
+    background: var(--bg);
+    transform: scale(1.1);
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--primary);
+    padding-top: 16px;
+    border-top: 1px solid #f5f5f4;
+}
+
+.card-footer .divider { 
+    color: var(--border); 
+}
+
+/* ==========================================================================
+   CARD ACTION HANDLERS AND CUSTOM TIMELINE OVERLAYS
+   ========================================================================== */
+
+.card-actions-wrapper {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    bottom: 32px;
+    right: 32px;
+    z-index: 20;
+}
+
+.action-icon-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.action-icon-btn:hover {
+    color: var(--text-main);
+    border-color: var(--text-main);
+}
+
+.action-icon-btn.delete:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: #fee2e2;
+}
+
+.calibration-box {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    border: 2px dashed rgba(45, 212, 191, 0.3);
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calibration-box::after {
+    content: "PLACE HAND HERE";
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(45, 212, 191, 0.6);
+    letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   WORKSPACE STEP HANDLERS & FUNCTIONAL UI NODES
+   ========================================================================== */
+
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.status-badge {
+    background: #f5f5f4;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e7e5e4;
+}
+
+.status-badge.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: #ccfbf1;
+}
+
+.step { display: none; min-height: 160px; }
+.step.active { display: block; }
+.step-meta { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f5f5f4;
+    font-size: 1.05rem;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.checklist-item:hover { color: var(--primary); }
+.checklist-item input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
+.nav-info { 
+    margin-top: 32px; 
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted); 
+    font-size: 0.85rem; 
+    text-align: center; 
+    line-height: 1.6; 
+}
+
+/* ==========================================================================
+   INTERACTIVE BUTTON CONFIGURATIONS
+   ========================================================================== */
+
+.button-group { display: flex; justify-content: space-between; gap: 16px; margin-top: 32px; }
+
+.nav-btn {
+    flex: 1; 
+    background: var(--text-main); 
+    color: var(--surface); 
+    border: none; 
+    padding: 14px 20px; 
+    border-radius: var(--radius-sm); 
+    font-size: 0.95rem; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: all 0.2s ease;
+}
+.nav-btn:hover { background: var(--primary); }
+.nav-btn:active { transform: translateY(1px); }
+
+.nav-btn.secondary { 
+    background: var(--surface); 
+    color: var(--text-muted); 
+    border: 1px solid var(--border);
+}
+.nav-btn.secondary:hover { background: #fafafa; color: var(--text-main); border-color: #d6d3d1; }
+
+.back-link { 
+    display: inline-flex; 
+    align-items: center;
+    margin-bottom: 24px; 
+    color: var(--text-muted); 
+    text-decoration: none; 
+    font-size: 0.9rem;
+    font-weight: 500; 
+    transition: color 0.2s ease;
+}
+.back-link:hover { color: var(--primary); }
+
+.audio-btn {
+    background: var(--primary-light); 
+    color: var(--primary);
+    border: 1px solid #ccfbf1; 
+    padding: 6px 14px; 
+    border-radius: 30px; 
+    cursor: pointer; 
+    font-size: 0.8rem; 
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.audio-btn:hover { background: var(--primary); color: var(--surface); }
+
+.toggle-camera-btn {
+    background: var(--surface); 
+    color: var(--text-main); 
+    border: 1px solid var(--border); 
+    padding: 8px 16px;
+    border-radius: var(--radius-sm); 
+    font-weight: 600; 
+    cursor: pointer; 
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+.toggle-camera-btn:hover { border-color: var(--text-main); background: #fafafa; }
+.toggle-camera-btn.off { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+
+.cta-btn {
+    display: inline-block;
+    background: var(--text-main);
+    color: var(--surface);
+    padding: 16px 36px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.cta-btn:hover {
+    background: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(15, 118, 110, 0.15);
+}
+
+/* ==========================================================================
+   HARDWARE CAPTURE STRATUMS / COMPUTER VISION HEADS-UP PIPELINES
+   ========================================================================== */
+
+.camera-wrapper {
+    position: fixed; top: 100px; right: 30px; width: 140px; height: 105px; z-index: 100;
+    border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+}
+
+#webcam { 
+    width: 100%; height: 100%; 
+    transform: scaleX(-1); background: #1c1917;
+    object-fit: cover;
+}
+
+.gesture-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+    background: rgba(15, 118, 110, 0.2); color: white;
+    backdrop-filter: blur(2px);
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT CONSTRAINTS
+   ========================================================================== */
+
+@media (max-width: 992px) {
+    .recipe-grid { grid-template-columns: repeat(2, 1fr); }
+    .camera-wrapper { position: absolute; top: -125px; right: 0; width: 120px; height: 90px; }
+    .recipe-card { margin-top: 140px; }
+}
+
+@media (max-width: 768px) {
+    .hero-section h1 { font-size: 2.5rem; }
+    .hero-section { margin-top: 60px; }
+    .search-controls { flex-direction: column; }
+    .filter-btn { width: 100%; }
+}
+
+@media (max-width: 640px) {
+    .recipe-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .recipe-directory-card { padding: 24px; }
+}
+
+/* ==========================================================================
+   LETMECOOK ADVANCED DARK MODE EXTENSION (CYBER SAGE TEAL)
+   ========================================================================== */
+
+body.kitchen-dark-mode {
+    --bg: #0f172a;             /* Deep Midnight Slate */
+    --surface: #1e293b;        /* Elevated Slate Card Background */
+    --text-main: #f8fafc;      /* Crisp Off-White */
+    --text-muted: #94a3b8;     /* Muted Steel Gray */
+    --border: #334155;         /* Subtle Slate Card Outlines */
+    --primary: #2dd4bf;        /* Bright Mint Teal */
+    --primary-light: #115e59;  /* Deep Forest Emerald Underlay */
+}
+
+body.kitchen-dark-mode .step p,
+body.kitchen-dark-mode .step h3,
+body.kitchen-dark-mode .step label,
+body.kitchen-dark-mode #dynamicStepContainer,
+body.kitchen-dark-mode #dynamicStepContainer p {
+    color: var(--text-main) !important;
+}
+
+body.kitchen-dark-mode .step-meta {
+    color: var(--text-muted) !important;
+}
+
+body.kitchen-dark-mode .checklist-item {
+    color: var(--text-main) !important;
+    border-bottom-color: var(--border);
+}
+
+body.kitchen-dark-mode .user-created-card {
+    background: #115e59 !important; 
+    border-color: #2dd4bf !important;
+}
+
+body.kitchen-dark-mode .recipe-directory-card,
+body.kitchen-dark-mode .recipe-card,
+body.kitchen-dark-mode .feature-card {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+body.kitchen-dark-mode .recipe-directory-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 30px rgba(45, 212, 191, 0.08);
+}
+
+body.kitchen-dark-mode .navbar {
+    background: var(--surface);
+    border-bottom-color: var(--border);
+}
+
+body.kitchen-dark-mode .nav-links a {
+    color: var(--text-muted);
+}
+
+body.kitchen-dark-mode .nav-links a:hover, 
+body.kitchen-dark-mode .nav-links a.active {
+    color: var(--primary);
+}
+
+body.kitchen-dark-mode .search-input {
+    background: #0f172a;
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+body.kitchen-dark-mode .search-input:focus {
+    border-color: var(--primary);
+}
+
+body.kitchen-dark-mode .nav-btn {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+body.kitchen-dark-mode .nav-btn:hover {
+    background: var(--primary);
+    color: #0f172a;
+}
+
+body.kitchen-dark-mode .nav-btn.secondary {
+    background: transparent;
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+body.kitchen-dark-mode .nav-btn.secondary:hover {
+    background: #1e293b;
+    border-color: var(--text-muted);
+}
+
+body.kitchen-dark-mode .card-footer {
+    border-top-color: var(--border);
+    color: var(--primary); 
+}
+
+body.kitchen-dark-mode .calibration-box {
+    border-color: rgba(45, 212, 191, 0.3);
+}
+
+body.kitchen-dark-mode #filterFavs span {
+    color: var(--primary) !important;
+}

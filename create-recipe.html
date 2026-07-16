@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Recipe — LetMeCook</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,600;1,400&family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="recipes.js"></script>
+
+    <!-- Keyless Cloud and AI Library -->
+    <script src="https://js.puter.com/v2/"></script>
+
+    <style>
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; color: var(--text-main); }
+        .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+        .dynamic-list-item { display: flex; gap: 12px; margin-bottom: 12px; width: 100%; align-items: center; }
+        
+        /* Structured Form Inputs & Selects QoL Alignments */
+        .qol-select {
+            width: 100%;
+            padding: 14px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            height: 49px;
+            transition: border-color 0.2s ease;
+        }
+        .qol-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .time-qty {
+            width: 100px;
+            min-width: 0 !important;
+        }
+        .time-unit {
+            width: 120px;
+        }
+
+        .ingredient-qty { 
+            width: 90px; 
+            min-width: 0 !important; 
+        }
+        .ingredient-unit { 
+            width: 125px; 
+            padding: 14px 12px; 
+            border: 1px solid var(--border); 
+            border-radius: var(--radius-sm); 
+            background: var(--surface); 
+            color: var(--text-main); 
+            font-family: inherit; 
+            font-size: 0.95rem; 
+            box-sizing: border-box;
+            height: 49px; 
+        }
+        .ingredient-name { 
+            flex: 1; 
+            min-width: 0 !important; 
+        }
+
+        .remove-btn { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; height: 49px; box-sizing: border-box; }
+        .remove-btn:hover { background: #fca5a5; }
+        .add-list-btn { background: var(--primary-light); color: var(--primary); border: 1px dashed var(--primary); padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; width: 100%; text-align: center; font-size: 0.9rem; margin-top: 4px; transition: all 0.2s; }
+        .add-list-btn:hover { background: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">LetMe<span>Cook.</span></a>
+        <div class="nav-links" style="display: flex; align-items: center;">
+            <a href="index.html">Home</a>
+            <a href="recipes.html">Recipes</a>
+            <button onclick="toggleGlobalKitchenTheme()" style="background: var(--text-main); color: var(--surface); border: none; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: 24px;">
+                <span class="material-symbols-outlined" id="globalThemeIcon" style="font-size: 1.1rem;">wb_sunny</span>
+                <span id="globalThemeText">Kitchen Mode</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="recipe-container">
+        <a href="recipes.html" class="back-link">← Back to Directory</a>
+        
+        <div class="recipe-card">
+            
+            <!-- KEYLESS AI RECIPE GENERATOR & CLIPBOARD FORMATTER PANEL -->
+            <div class="ai-assistant-panel" style="margin-bottom: 32px; padding: 20px; background: var(--primary-light); border: 1px solid var(--primary); border-radius: var(--radius-lg);">
+                <h3 style="margin-top:0; display:flex; align-items:center; gap:8px; color:var(--primary);">
+                    <span class="material-symbols-outlined">auto_awesome</span> AI Recipe Assistant
+                </h3>
+                <p style="font-size:0.9rem; margin-bottom:16px; color:var(--text-muted); line-height: 1.5;">
+                    Enter a dish name (e.g., "Pork Sisig") to auto-create, or paste a messy list of ingredients and steps from an external website to dynamically structure them into your layout.
+                </p>
+                
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <textarea id="aiInputPrompt" class="search-input" style="width:100%; box-sizing:border-box; height:80px; resize:vertical; min-width:0 !important;" placeholder="e.g., 'Generate an easy Sisig recipe' OR paste disorganized text blocks here..."></textarea>
+                </div>
+                
+                <div style="display:flex;">
+                    <button type="button" class="cta-btn" onclick="generateRecipeWithAI()" style="padding:10px 20px; font-size:0.85rem; border:none; margin:0; flex:1; height:49px;">Generate / Format with AI</button>
+                </div>
+                <div id="aiStatusMessage" style="margin-top:12px; font-size:0.85rem; font-weight:600; color:var(--primary); display:none;">Processing...</div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 32px 0;">
+
+            <h2>Create Custom Recipe</h2>
+            <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Draft your custom culinary project below to integrate it directly with our hands-free vision tracking system.</p>
+            
+            <form id="customRecipeForm" onsubmit="saveCustomRecipe(event)">
+                <div class="form-group">
+                    <label class="form-label" for="recipeTitleInput">Recipe Name</label>
+                    <input type="text" id="recipeTitleInput" class="search-input" style="width:100%; box-sizing:border-box;" placeholder="e.g., Homemade Sinigang Pork Thighs" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label">Cooking Time</label>
+                        <div style="display: flex; gap: 8px; width: 100%;">
+                            <input type="number" id="recipeTimeInput" min="1" class="search-input time-qty" placeholder="e.g., 40" required>
+                            <select id="recipeTimeUnitInput" class="qol-select time-unit" required>
+                                <option value="Mins">Mins</option>
+                                <option value="Hrs">Hour(s)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label" for="recipeLevelInput">Difficulty Level</label>
+                        <select id="recipeLevelInput" class="qol-select" required>
+                            <option value="" disabled selected>Select Difficulty</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="recipeDescInput">Brief Description</label>
+                    <input type="text" id="recipeDescInput" class="search-input" style="width:100%; box-sizing:border-box;" placeholder="A short overview of your meal..." required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ingredients Inventory</label>
+                    <div id="ingredientsFormContainer">
+                        <div class="dynamic-list-item">
+                            <input type="number" step="0.25" min="0" class="search-input ingredient-qty" placeholder="Qty" required>
+                            <select class="ingredient-unit" required>
+                                <option value="">Unit</option>
+                                <option value="g">g (grams)</option>
+                                <option value="kg">kg (kilograms)</option>
+                                <option value="ml">ml (milliliters)</option>
+                                <option value="L">L (liters)</option>
+                                <option value="tsp">tsp</option>
+                                <option value="tbsp">tbsp</option>
+                                <option value="cup">cup(s)</option>
+                                <option value="pcs">pc(s)</option>
+                                <option value="to taste">to taste</option>
+                            </select>
+                            <input type="text" class="search-input ingredient-name" placeholder="Ingredient name (e.g., Pork belly)" required>
+                        </div>
+                    </div>
+                    <button type="button" class="add-list-btn" onclick="addIngredientField()">+ Add Ingredient Requirement</button>
+                </div>
+
+                <div class="form-group" style="margin-top: 32px;">
+                    <label class="form-label">Cooking Instructions Pipeline</label>
+                    <div id="stepsFormContainer">
+                        <div class="dynamic-list-item">
+                            <input type="text" class="search-input step-entry" style="flex:1;" placeholder="Step 1 details..." required>
+                        </div>
+                    </div>
+                    <button type="button" class="add-list-btn" onclick="addStepField()">+ Add Cooking Instruction Step</button>
+                </div>
+
+                <button type="submit" class="cta-btn" style="width: 100%; text-align: center; margin-top: 24px; cursor: pointer; border: none;">Save and Compile Recipe</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SDK & Dynamic Form Injection Logic -->
+    <script>
+        async function generateRecipeWithAI() {
+            const prompt = document.getElementById('aiInputPrompt').value.trim();
+            const statusMsg = document.getElementById('aiStatusMessage');
+
+            if (!prompt) {
+                alert("Please enter a dish name or paste raw text to organize.");
+                return;
+            }
+
+            statusMsg.style.display = 'block';
+            statusMsg.innerText = "✨ AI is compiling your recipe layout...";
+
+            try {
+                // Call Gemini via keyless Puter AI integration
+                const response = await puter.ai.chat(
+                    `You are a professional recipe extraction parser. Based on this request: "${prompt}", generate a structured recipe.
+                    
+                    If the user gives just a dish name, invent a standard recipe.
+                    If the user provides copy-pasted raw ingredients and instructions, parse and organize them.
+                    
+                    IMPORTANT: For ingredients, split them into:
+                    - "qty": a clean number (e.g., 2, 0.5, 250) or an empty string "" if not applicable.
+                    - "unit": abbreviation strictly matching: "g", "kg", "ml", "L", "tsp", "tbsp", "cup", "pcs", or "to taste".
+                    - "name": plain name of the ingredient without units or quantities.
+                    
+                    Return output in this JSON format ONLY (Do not include markdown blocks like \`\`\`json or regular conversational text):
+                    {
+                        "title": "Recipe Name",
+                        "timeQty": 45,
+                        "timeUnit": "Mins",
+                        "level": "Medium",
+                        "description": "Short overview",
+                        "ingredients": [
+                            {"qty": 500, "unit": "g", "name": "Pork Belly"},
+                            {"qty": 2, "unit": "tbsp", "name": "Soy Sauce"}
+                        ],
+                        "steps": [
+                            "Step 1 instructions...",
+                            "Step 2 instructions..."
+                        ]
+                    }`,
+                    { model: 'google/gemini-3.5-flash' }
+                );
+
+                const cleanText = response.message.content.replace(/```json|```/g, '').trim();
+                const recipeData = JSON.parse(cleanText);
+
+                // Populate Text & Dropdowns
+                document.getElementById('recipeTitleInput').value = recipeData.title || '';
+                document.getElementById('recipeTimeInput').value = recipeData.timeQty || '';
+                document.getElementById('recipeTimeUnitInput').value = recipeData.timeUnit || 'Mins';
+                document.getElementById('recipeLevelInput').value = recipeData.level || 'Medium';
+                document.getElementById('recipeDescInput').value = recipeData.description || '';
+
+                // Hydrate Ingredients List
+                const ingContainer = document.getElementById('ingredientsFormContainer');
+                ingContainer.innerHTML = '';
+                
+                if (recipeData.ingredients && recipeData.ingredients.length > 0) {
+                    recipeData.ingredients.forEach((ing, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'dynamic-list-item';
+                        div.innerHTML = `
+                            <input type="number" step="0.25" min="0" class="search-input ingredient-qty" placeholder="Qty" value="${ing.qty || ''}" required>
+                            <select class="ingredient-unit" required>
+                                <option value="">Unit</option>
+                                <option value="g" ${ing.unit === 'g' ? 'selected' : ''}>g (grams)</option>
+                                <option value="kg" ${ing.unit === 'kg' ? 'selected' : ''}>kg (kilograms)</option>
+                                <option value="ml" ${ing.unit === 'ml' ? 'selected' : ''}>ml (milliliters)</option>
+                                <option value="L" ${ing.unit === 'L' ? 'selected' : ''}>L (liters)</option>
+                                <option value="tsp" ${ing.unit === 'tsp' ? 'selected' : ''}>tsp</option>
+                                <option value="tbsp" ${ing.unit === 'tbsp' ? 'selected' : ''}>tbsp</option>
+                                <option value="cup" ${ing.unit === 'cup' ? 'selected' : ''}>cup(s)</option>
+                                <option value="pcs" ${ing.unit === 'pcs' ? 'selected' : ''}>pc(s)</option>
+                                <option value="to taste" ${ing.unit === 'to taste' ? 'selected' : ''}>to taste</option>
+                            </select>
+                            <input type="text" class="search-input ingredient-name" style="flex:1;" placeholder="Ingredient name..." value="${ing.name || ''}" required>
+                            ${i > 0 ? `<button type="button" class="remove-btn" onclick="this.parentElement.remove()"><span class="material-symbols-outlined">delete</span></button>` : ''}
+                        `;
+                        ingContainer.appendChild(div);
+                    });
+                } else {
+                    addIngredientField();
+                }
+
+                // Hydrate Instruction Steps
+                const stepsContainer = document.getElementById('stepsFormContainer');
+                stepsContainer.innerHTML = '';
+                
+                if (recipeData.steps && recipeData.steps.length > 0) {
+                    recipeData.steps.forEach((step, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'dynamic-list-item';
+                        div.innerHTML = `
+                            <input type="text" class="search-input step-entry" style="flex:1;" placeholder="Step ${i + 1} details..." value="${step}" required>
+                            ${i > 0 ? `<button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateStepPlaceholders();"><span class="material-symbols-outlined">delete</span></button>` : ''}
+                        `;
+                        stepsContainer.appendChild(div);
+                    });
+                } else {
+                    addStepField();
+                }
+
+                statusMsg.innerText = "✔️ Template populated successfully! You can make modifications before saving.";
+                setTimeout(() => { statusMsg.style.display = 'none'; }, 6000);
+
+            } catch (error) {
+                console.error(error);
+                statusMsg.innerText = "❌ AI formatting failed. Please try again.";
+            }
+        }
+    </script>
+
+    <script>
+        function addIngredientField() {
+            const container = document.getElementById('ingredientsFormContainer');
+            const div = document.createElement('div'); div.className = 'dynamic-list-item';
+            div.innerHTML = `
+                <input type="number" step="0.25" min="0" class="search-input ingredient-qty" placeholder="Qty" required>
+                <select class="ingredient-unit" required>
+                    <option value="">Unit</option>
+                    <option value="g">g (grams)</option>
+                    <option value="kg">kg (kilograms)</option>
+                    <option value="ml">ml (milliliters)</option>
+                    <option value="L">L (liters)</option>
+                    <option value="tsp">tsp</option>
+                    <option value="tbsp">tbsp</option>
+                    <option value="cup">cup(s)</option>
+                    <option value="pcs">pc(s)</option>
+                    <option value="to taste">to taste</option>
+                </select>
+                <input type="text" class="search-input ingredient-name" style="flex:1;" placeholder="Ingredient name..." required>
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove()"><span class="material-symbols-outlined">delete</span></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addStepField() {
+            const container = document.getElementById('stepsFormContainer');
+            const stepNum = container.children.length + 1;
+            const div = document.createElement('div'); div.className = 'dynamic-list-item';
+            div.innerHTML = `<input type="text" class="search-input step-entry" style="flex:1;" placeholder="Step ${stepNum} details..." required>
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateStepPlaceholders();"><span class="material-symbols-outlined">delete</span></button>`;
+            container.appendChild(div);
+        }
+
+        function updateStepPlaceholders() {
+            document.querySelectorAll('.step-entry').forEach((input, index) => { input.placeholder = `Step ${index + 1} details...`; });
+        }
+
+        function saveCustomRecipe(event) {
+            event.preventDefault();
+            const title = document.getElementById('recipeTitleInput').value.trim();
+            
+            const timeQty = document.getElementById('recipeTimeInput').value.trim();
+            const timeUnit = document.getElementById('recipeTimeUnitInput').value;
+            const time = `${timeQty} ${timeUnit}`;
+
+            const level = document.getElementById('recipeLevelInput').value;
+            const description = document.getElementById('recipeDescInput').value.trim();
+
+            const ingredientItems = Array.from(document.querySelectorAll('#ingredientsFormContainer .dynamic-list-item'));
+            const ingredients = ingredientItems.map(item => {
+                const qty = item.querySelector('.ingredient-qty').value.trim();
+                const unit = item.querySelector('.ingredient-unit').value;
+                const name = item.querySelector('.ingredient-name').value.trim();
+                
+                if (unit === "to taste") {
+                    return `${name} (${unit})`;
+                }
+                return `${qty}${unit} ${name}`;
+            }).filter(val => val !== "");
+
+            const steps = Array.from(document.querySelectorAll('.step-entry')).map(input => input.value.trim()).filter(val => val !== "");
+
+            const recipeKey = 'user_' + title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const newRecipeObject = { title, time, level, description, ingredients, steps };
+
+            let savedRecipes = JSON.parse(localStorage.getItem('userCustomRecipes')) || {};
+            savedRecipes[recipeKey] = newRecipeObject;
+            localStorage.setItem('userCustomRecipes', JSON.stringify(savedRecipes));
+            window.location.href = 'recipes.html';
+        }
+    </script>
+</body>
+</html>
