@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>LetMeCook — Dynamic Cooking Workspace</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,10 +121,14 @@
 
         let isCameraRunning = false;
         let cameraEngine = null;
+        
+        // --- CALIBRATION TUNING FOR MOBILE DEVICES ---
         let frameHistory = [];         
-        const HISTORY_SIZE = 5;        
+        const HISTORY_SIZE = 8;        // Raised sample count to smooth out sudden camera frame jumps
         let lastWaveTime = 0;          
-        const WAVE_COOLDOWN = 1200;    
+        const WAVE_COOLDOWN = 1800;    // Raised threshold cooldown to 1.8 seconds to avoid double pages skipping
+        let lastProcessedFrameTime = 0;
+        const MOBILE_FRAME_THROTTLE = 100; // Throttle hand tracking checks down to roughly 10fps to lower mobile CPU/battery usage
 
         let isSpeechPausedByFist = false;
         let userVoiceRateSetting = 1.0; 
@@ -185,6 +189,12 @@
 
         function onResults(results) {
             if (!isCameraRunning) return;
+
+            // iOS & iPad Performance Throttle: Skip evaluation frames occurring too quickly
+            const now = performance.now();
+            if (now - lastProcessedFrameTime < MOBILE_FRAME_THROTTLE) return;
+            lastProcessedFrameTime = now;
+
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
                 const stableAnchor = landmarks[9]; 
@@ -216,7 +226,7 @@
                 const tip = landmarks[idx];
                 spatialProximitySum += Math.sqrt(Math.pow(tip.x - wrist.x, 2) + Math.pow(tip.y - wrist.y, 2));
             });
-            const FIST_DISTANCE_THRESHOLD = 0.75; 
+            const FIST_DISTANCE_THRESHOLD = 0.65; // Lowered threshold distance to require tighter hand closure for triggering pauses
 
             if (spatialProximitySum < FIST_DISTANCE_THRESHOLD) {
                 if (!isSpeechPausedByFist && window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
@@ -244,12 +254,18 @@
 
             const oldestFrame = frameHistory[0];
             const newestFrame = frameHistory[frameHistory.length - 1];
-            const velocityX = (newestFrame.x - oldestFrame.x) / (newestFrame.time - oldestFrame.time);
+            
+            // Calculate actual travel displacement across the viewport plane
+            const deltaX = newestFrame.x - oldestFrame.x;
+            const velocityX = deltaX / (newestFrame.time - oldestFrame.time);
 
             if (currentTime - lastWaveTime < WAVE_COOLDOWN) return;
-            const SWIPE_VELOCITY_THRESHOLD = 0.0006; 
+            
+            // --- INCREASED SENSITIVITY PROTECTION BOUNDARIES ---
+            const MIN_SWIPE_DISPLACEMENT = 0.18; // Requires hand to cross at least 18% of viewport space width
+            const SWIPE_VELOCITY_THRESHOLD = 0.0012; // Raised speed constraint to filter out accidental drifting tracking noise
 
-            if (Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+            if (Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD && Math.abs(deltaX) > MIN_SWIPE_DISPLACEMENT) {
                 if (velocityX > 0) {
                     triggerVisualFeedback("arrow_forward"); 
                     changeStep(1);
@@ -354,7 +370,7 @@
                     x: Math.random() * canvas.width, 
                     y: Math.random() * canvas.height - canvas.height,
                     size: Math.random() * 6 + 4, 
-                    color: colors[Math.floor(Math.random() * colors.length)],
+                    color: colors[colors[Math.floor(Math.random() * colors.length)]],
                     speedY: Math.random() * 3 + 2, 
                     speedX: Math.random() * 2 - 1,
                     rotation: Math.random() * 360, 

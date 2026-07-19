@@ -197,15 +197,14 @@ p {
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     font-family: inherit;
-    font-size: 0.95rem;
     color: var(--text-main);
     background: var(--surface);
     transition: border-color 0.2s ease;
     
-   /* Prevents default browser styling and zoom triggers on focus */
--webkit-appearance: none;
-appearance: none; /* Standard property for compatibility */
-font-size: 16px;  /* iOS standard to prevent automatic browser zoom on input focus */
+    /* Prevents default browser styling and zoom triggers on focus */
+    -webkit-appearance: none;
+    appearance: none; /* Standard property for compatibility */
+    font-size: 16px;  /* iOS standard to prevent automatic browser zoom on input focus */
 }
 
 .search-input:focus {
@@ -730,6 +729,21 @@ font-size: 16px;  /* iOS standard to prevent automatic browser zoom on input foc
     .nav-btn {
         width: 100%;
         height: 48px; /* Safe Apple Human Interface Guidelines standard */
+    }
+
+    /* Push the camera preview below the mobile navbar and layer it correctly */
+    .camera-wrapper {
+        position: fixed !important;
+        top: calc(70px + env(safe-area-inset-top)) !important;
+        right: 12px !important;
+        width: 100px !important;
+        height: 75px !important;
+        z-index: 1001 !important; /* Stack cleanly over sticky navbar */
+    }
+
+    /* Reduce vertical padding constraints since camera floats statically */
+    .recipe-card {
+        margin-top: 20px !important;
     }
 }
 
